@@ -3,10 +3,10 @@
 template<class T> struct BIT{
 	vector<T> bit;
 	BIT(){
-		bit.assign(MAXN, 0);
+		bit.assign(mxN, 0);
 	}
 	void update(int ind, T delta){
-		for(; ind < MAXN; ind += (ind & (-ind))){
+		for(; ind < mxN; ind += (ind & (-ind))){
 			bit[ind] += delta;
 		}
 	}
@@ -25,10 +25,10 @@ template<class T> struct BIT{
 template<class T> struct BIT{
 	vector<T> bit;
 	BIT(){
-		bit.assign(MAXN, 0);
+		bit.assign(mxN, 0);
 	}
 	void update(int ind, T delta){
-		for(; ind < MAXN; ind = ind | (ind + 1)){
+		for(; ind < mxN; ind = ind | (ind + 1)){
 			bit[ind] += delta;
 		}
 	}
