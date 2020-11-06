@@ -1,5 +1,5 @@
-ll fact[100005];
-ll invFact[100005];
+ll fact[mxN];
+ll invFact[mxN];
 
 ll C(ll n, ll r){
 	if(r > n) return 0;
@@ -26,7 +26,7 @@ ll inv(ll base){
 
 fact[0] = 1;
 invFact[0] = 1;
-for(ll i = 1; i < 100005; i++){
+for(ll i = 1; i < mxN; i++){
 	fact[i] = (1LL * fact[i - 1] * i) % MOD;
 	invFact[i] = inv(fact[i]);
 }
