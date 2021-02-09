@@ -26,7 +26,9 @@ ll inv(ll base){
 
 fact[0] = 1;
 invFact[0] = 1;
-for(ll i = 1; i < mxN; i++){
-	fact[i] = (1LL * fact[i - 1] * i) % MOD;
-	invFact[i] = inv(fact[i]);
+fact[0] = 1;
+for(ll i = 1LL; i < mxN; i++) fact[i] = (1LL * fact[i - 1] * i) % MOD;
+for(ll i = mxN - 1; i >= 0LL; i--){
+	if(i == (mxN - 1)) invFact[i] = inv(fact[i]);
+	else invFact[i] = (invFact[i + 1] * (i + 1)) % MOD;
 }
