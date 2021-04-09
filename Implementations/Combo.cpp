@@ -24,7 +24,6 @@ ll inv(ll base){
 
 //in main
 
-fact[0] = 1;
 invFact[0] = 1;
 fact[0] = 1;
 for(ll i = 1LL; i < mxN; i++) fact[i] = (1LL * fact[i - 1] * i) % MOD;
