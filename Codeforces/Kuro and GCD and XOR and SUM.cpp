@@ -18,53 +18,12 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+const int mxN = 1e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
-}
+set<int> d[mxN];
+int vis[mxN];
 
 int main(){
 	ios_base::sync_with_stdio(false);
@@ -73,7 +32,47 @@ int main(){
 	//freopen("output.out", "w", stdout);
 	int q;
 	cin >> q;
-	while(q--) solve();
+	rep(i, q){
+		int t;
+		cin >> t;
+		if(t == 1){
+			int u;
+			cin >> u;
+			if(vis[u]) continue;
+			for(int j = 1; (j * j) <= u; j++){
+				if(u % j == 0){
+					d[j].insert(u);
+					if(u / j != j) d[u / j].insert(u);
+				}
+			}
+			vis[u] = 1;
+		}
+		else{
+			int x, k, s;
+			cin >> x >> k >> s;
+			if(x % k != 0 || !d[k].size()){
+				cout << -1 << '\n';
+				continue;
+			}
+			auto it = d[k].lb(s - x);
+			if(it == d[k].end()) it--;
+			int ans = -1, bst = -1;
+			while(true){
+				if((*it + x) > s){
+					if(it == d[k].begin()) break;
+					else it--;
+				}
+				if((*it ^ x) > bst){
+					ans = *it;
+					bst = (*it ^ x);
+				}
+				if(*it + x < bst) break;
+				if(it == d[k].begin()) break;
+				it--;
+			}
+			cout << ans << '\n';
+		}
+	}
 	return 0;
 }
 /*

@@ -18,62 +18,43 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
-
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
-}
 
 int main(){
 	ios_base::sync_with_stdio(false);
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int n, m;
+	cin >> n >> m;
+	int mx = 0;
+	repn(i, 1, n + 1) mx += (i - 1) / 2;
+	if(m > mx){
+		cout << -1 << '\n';
+		return 0;
+	}
+	vi ans;
+	int cnt = 0;
+	repn(i, 1, n + 1){
+		cnt += (i - 1) / 2;
+		if(cnt > m){
+			cnt -= (i - 1) / 2;
+			break;
+		}
+		ans.pb(i);
+	}
+	int dif = m - cnt;
+	if(dif > 0){
+		int nm = (int)(ans.size()) - 1;
+		ans.pb(ans[nm] + ans[nm - ((2 * dif) - 1)]);
+	}
+	if((int)(ans.size()) < n){
+		int st = 1e7, gap = ans[(int)(ans.size()) - 1] + ans[(int)(ans.size()) - 2] + 1;
+		while((int)(ans.size()) < n) ans.pb(st), st += gap;
+	}
+	rep(i, n) cout << ans[i] << " ";
+	cout << '\n';
 	return 0;
 }
 /*

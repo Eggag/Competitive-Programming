@@ -18,52 +18,47 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+const int mxN = 2e5 + 5;;
+const int logn = 23;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
+int n, g1;
+int a[mxN];
+int gc[logn][mxN];
+ 
+int GCD(int l, int r) { // [l; r)
+	int t = __lg(r - l);
+	return gcd(gc[t][l], gc[t][r - (1 << t)]);
 }
 
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
+bool check(int g){
+	rep(i, n){
+		int l = i, r = i + g, l1 = i + g - n;
+		int gg = GCD(l, min(n, r + 1));
+		if(l1 >= 0) gg = gcd(gg, GCD(0, l1 + 1));
+		if(gg != g1) return 0;
 	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
+	return 1;
 }
 
 void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+	cin >> n;
+	g1 = 0;
+	rep(i, n) cin >> a[i], g1 = gcd(g1, a[i]);
+	rep(i, n) gc[0][i] = a[i];
+	for(int l = 0; l < logn - 1; l++){
+		for(int i = 0; i + (2 << l) <= n; i++){
+			gc[l + 1][i] = gcd(gc[l][i], gc[l][i + (1 << l)]);
+		}
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+	int l = 0, r = n;
+	while(l < r){
+		int mid = (l + r) / 2;
+		if(check(mid)) r = mid;
+		else l = mid + 1;
+	}
+	cout << l << '\n';
 }
 
 int main(){
@@ -71,9 +66,9 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int t;
+	cin >> t;
+	while(t--) solve();
 	return 0;
 }
 /*

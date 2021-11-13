@@ -18,62 +18,46 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
+int AND(int i, int j){
+	cout << "and " << i + 1 << ' ' << j + 1 << endl;
+	int res;
+	cin >> res;
+	return res;
 }
 
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
+int OR(int i, int j){
+	cout << "or " << i + 1 << ' ' << j + 1 << endl;
+	int res;
+	cin >> res;
+	return res;
 }
 
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+int XOR(int i, int j, int val){
+	return val ^ (AND(i, j) ^ OR(i, j));
 }
 
 int main(){
-	ios_base::sync_with_stdio(false);
-	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int n, k;
+	cin >> n >> k;
+	vi ans(n, 0);
+	int a = AND(0, 1), b = AND(1, 2), c = AND(0, 2);
+	ans[0] = a | c;
+	ans[1] = a | b;
+	ans[2] = b | c;
+	int a1 = OR(0, 1), b1 = OR(1, 2), c1 = OR(0, 2);
+	rep(i, 31) if(!(ans[0] & (1 << i)) && !(ans[1] & (1 << i)) && !(ans[2] & (1 << i))){
+		if((a1 & (1 << i)) && (c1 & (1 << i))) ans[0] |= (1 << i);
+		if((a1 & (1 << i)) && (b1 & (1 << i))) ans[1] |= (1 << i);
+		if((b1 & (1 << i)) && (c1 & (1 << i))) ans[2] |= (1 << i);
+	}
+	repn(i, 3, n) ans[i] = XOR(i - 1, i, ans[i - 1]);
+	sort(all(ans));
+	cout << "finish " << ans[k - 1] << '\n';
 	return 0;
 }
 /*

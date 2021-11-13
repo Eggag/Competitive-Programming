@@ -18,52 +18,39 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
+int cnt[30];
 
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
+bool cmp(pair<char, int> a, pair<char, int> b){
+	if(cnt[a.fi - 'a'] != cnt[b.fi - 'a']) return cnt[a.fi - 'a'] > cnt[b.fi - 'a'];
+	return a.fi < b.fi;
 }
 
 void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+	string s;
+	cin >> s;
+	int n = (int)(s.size());
+	rep(i, 30) cnt[i] = 0;
+	rep(i, n) cnt[s[i] - 'a']++;
+	rep(i, 30) if(cnt[i] > (n / 2)){
+		cout << "IMPOSSIBLE\n";
+		return;
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+	vector<char> ans(n, '.');
+	vector<pair<char, int>> p(n);
+	rep(i, n) p[i] = mp(s[i], i);
+	sort(all(p), cmp);
+	int l = 0;
+	while(p[l].fi == p[0].fi) l++;
+	rep(i, n){
+		ans[p[i].se] = p[l].fi;
+		l++;
+		if(l == n) l = 0;
+	}
+	rep(i, n) cout << ans[i];
+	cout << '\n';
 }
 
 int main(){
@@ -71,9 +58,12 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int t;
+	cin >> t;
+	repn(i, 1, t + 1){
+		cout << "Case #" << i << ": ";
+		solve();
+	}
 	return 0;
 }
 /*

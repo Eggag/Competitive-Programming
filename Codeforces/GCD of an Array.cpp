@@ -18,52 +18,45 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+const int mxN = 2e5 + 5;
+const int MOD = 1e9 + 7;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
+ll mypow(ll a, ll p){
+	if(p <= 0) return 1LL;
+	if(p & 1) return (a * mypow(a, p - 1)) % MOD;
+	ll x = mypow(a, p / 2);
+	return sq(x) % MOD;
 }
 
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
+int p[mxN], ls[mxN];
+
+void sieve(int m){
+	repn(i, 2, m){
+		if(!p[i]) p[i] = i;
+		for(int j = i + i; j < m; j += i) if(!p[j]) p[j] = i;
 	}
 }
 
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+int n, q;
+ll ans = 1LL;
+map<int, int> nm[mxN];
+multiset<int> st[mxN];
+
+void add(int i, int x){
+	while(x > 1){
+		int cr = p[x];
+		int rm = nm[i][cr]++;
+		auto it = st[cr].find(rm);
+		if(it != st[cr].end()) st[cr].erase(it);
+		st[cr].insert(rm + 1);
+		if(*st[cr].begin() > ls[cr] && (int)(st[cr].size()) == n){
+			(ans *= mypow((ll)(cr), (ll)((*st[cr].begin()) - ls[cr]))) %= MOD;
+			ls[cr] = *st[cr].begin();
+		}
+		x /= cr;
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
 }
 
 int main(){
@@ -71,9 +64,16 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	cin >> n >> q;
+	vi a(n);
+	sieve(mxN - 1);
+	rep(i, n) cin >> a[i], add(i, a[i]);
+	rep(i, q){
+		int ind, x;
+		cin >> ind >> x;
+		add(ind - 1, x);
+		cout << ans << '\n';
+	}
 	return 0;
 }
 /*

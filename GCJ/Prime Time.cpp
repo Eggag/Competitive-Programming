@@ -18,52 +18,40 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
 void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+	int m;
+	cin >> m;
+	vector<pair<ll, ll>> p(m);
+	ll sum = 0LL;
+	vector<ll> nm(505, 0LL);
+	rep(i, m){
+		cin >> p[i].fi >> p[i].se, sum += p[i].fi * p[i].se;
+		nm[p[i].fi] = p[i].se;
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+	ll bst = 0LL;
+	for(ll sub = 2LL; sub <= 500 * 64; sub++){
+		if(sub >= sum) break;
+		ll rem = sum - sub;
+		ll sm = 0LL, rem1 = rem;
+		int f = 1;
+		for(ll j = 2LL; j < 500; j++){
+			ll cnt = 0;
+			while(rem1 % j == 0){
+				rem1 /= j;
+				sm += j;
+				cnt++;
+			}
+			if(cnt > nm[j]) f = 0;
+		}
+		if(rem1 == 1LL && sm == sub && f){
+			bst = sum - sub;
+			break;
+		}
+	}
+	cout << bst << '\n';
 }
 
 int main(){
@@ -71,9 +59,12 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int t;
+	cin >> t;
+	repn(i, 1, t + 1){
+		cout << "Case #" << i << ": ";
+		solve();
+	}
 	return 0;
 }
 /*

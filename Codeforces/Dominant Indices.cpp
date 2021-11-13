@@ -18,52 +18,42 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+const int mxN = 1e6 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
+vi g[mxN];
+pi ans[mxN];
+map<int, int> cnt[mxN];
 
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
+bool cmp(int a, int b){
+	return (int)(cnt[a].size()) > (int)(cnt[b].size());
 }
 
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
+void dfs(int cur, int prev, int de = 0){
+	for(int x : g[cur]) if(x != prev) dfs(x, cur, de + 1);
+	cnt[cur][de] = 1;
+	sort(all(g[cur]), cmp);
+	int f = 0;
+	pi bst = mp(1, 0);
+	for(int x : g[cur]) if(x != prev){
+		if(ans[x].fi == bst.fi) bst.se = min(bst.se, ans[x].se + 1);
+		else if(ans[x].fi > bst.fi) bst = mp(ans[x].fi, ans[x].se + 1);
+		if(!f){
+			swap(cnt[x], cnt[cur]);
+			cnt[cur][de]++;
+			f = 1;
 		}
 		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
+			for(pi y : cnt[x]){
+				cnt[cur][y.fi] += y.se;
+				int nw = cnt[cur][y.fi];
+				if(nw == bst.fi) bst.se = min(bst.se, y.fi - de);
+				else if(nw > bst.fi) bst = mp(nw, y.fi - de);
+			}
 		}
 	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+	ans[cur] = bst;
 }
 
 int main(){
@@ -71,9 +61,17 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int n;
+	cin >> n;
+	rep(i, n - 1){
+		int x, y;
+		cin >> x >> y;
+		x--, y--;
+		g[x].pb(y);
+		g[y].pb(x);
+	}
+	dfs(0, -1);
+	rep(i, n) cout << ans[i].se << '\n';
 	return 0;
 }
 /*

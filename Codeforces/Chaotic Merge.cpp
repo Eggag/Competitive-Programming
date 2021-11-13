@@ -18,62 +18,47 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+const int MOD = 998244353;
+const int mxN = 1005;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
-}
+int dp[mxN][mxN][2][3];
 
 int main(){
 	ios_base::sync_with_stdio(false);
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	string x, y;
+	cin >> x >> y;
+	int n = (int)(x.size()), m = (int)(y.size());
+	rep(i, n + 1) rep(j, m + 1){
+		if(i) (dp[i][j][0][0] += 1) %= MOD;
+		if(j) (dp[i][j][1][1] += 1) %= MOD;
+		rep(k, 2) rep(l, 3){
+			int k1 = 0;
+			if(!k){
+				if(i) k1 = x[i - 1] - 'a';
+				else continue;
+			}
+			else{
+				if(j) k1 = y[j - 1] - 'a';
+				else continue;
+			}
+			if(i < n && k1 != (x[i] - 'a')){
+				int l1 = ((l + 1) | 1) - 1;
+				(dp[i + 1][j][0][l1] += dp[i][j][k][l]) %= MOD;
+			}
+			if(j < m && k1 != (y[j] - 'a')){
+				int l1 = ((l + 1) | 2) - 1;
+				(dp[i][j + 1][1][l1] += dp[i][j][k][l]) %= MOD;
+			}
+		}
+	}
+	int ans = 0;
+	rep(i, n + 1) rep(j, m + 1) rep(k, 2) (ans += dp[i][j][k][2]) %= MOD;
+	cout << ans << '\n';
 	return 0;
 }
 /*

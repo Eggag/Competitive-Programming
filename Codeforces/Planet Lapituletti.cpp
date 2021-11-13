@@ -18,52 +18,50 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
+int h, m;
+int op[10];
 
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
+bool check(int a, int b){
+	int d, d1, d2, d3;
+	if(a < 10) d = 0, d1 = a;
+	else{
+		d1 = a % 10;
+		d = (a / 10) % 10;
 	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
+	if(b < 10) d2 = 0, d3 = b;
+	else{
+		d3 = b % 10;
+		d2 = (b / 10) % 10;
 	}
+	if(!~op[d] || !~op[d1] || !~op[d2] || !~op[d3]) return 0;	
+	int x = op[d3] * 10 + op[d2];
+	int y = op[d1] * 10 + op[d];
+	if(x < h && y < m){
+		cout << (a < 10 ? "0" : "") << a << ":" << (b < 10 ? "0" : "") << b << '\n';	
+		return 1;
+	}
+	return 0;
 }
 
 void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+	cin >> h >> m;
+	string s;
+	cin >> s;
+	int a = (int)(s[0] - '0') * 10 + (int)(s[1] - '0');
+	int b = (int)(s[3] - '0') * 10 + (int)(s[4] - '0');
+	while(a < h){
+		while(b < m){
+			if(check(a, b)) goto en;
+			b++;
+		}
+		a++;
+		b = 0;
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+	cout << "00:00" << '\n';
+	en:;
 }
 
 int main(){
@@ -71,9 +69,15 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int t;
+	cin >> t;
+	memset(op, -1, sizeof(op));
+	op[0] = 0;
+	op[1] = 1;
+	op[5] = 2;
+	op[2] = 5;
+	op[8] = 8;
+	while(t--) solve();
 	return 0;
 }
 /*

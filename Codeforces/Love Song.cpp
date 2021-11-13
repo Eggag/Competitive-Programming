@@ -18,62 +18,59 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
+struct seg{
+	int dat[1 << 20];
+	int sz;
+	seg(int s){
+		sz = s;
+		for(int i = 0; i < (1 << 20); i++){
+			dat[i] = 0;
 		}
 	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+	void update(int i, int s, int e, int x, int v){
+		if(s == e){
+			dat[i] = v;
+			return;
+		}
+		int m = (s + e) / 2;
+		if(x <= m) update(i << 1, s, m, x, v);
+		else update(i << 1 | 1, m + 1, e, x, v);
+		dat[i] = dat[i << 1] + dat[i << 1 | 1];
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
-}
+	void update(int x, int v){
+		update(1, 0, sz, x, v);
+	}
+	ll query(int i, int s, int e, int x, int y){
+		if(e < x || y < s) return 0;
+		if(x <= s && e <= y) return dat[i];
+		int m = (s + e) / 2;
+		return query(i << 1, s, m, x, y) + query(i << 1 | 1, m + 1, e, x, y);
+	}
+	ll query(int x, int y){
+		return query(1, 0, sz, x, y);
+	}
+};
+
 
 int main(){
 	ios_base::sync_with_stdio(false);
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int n, q;
+	cin >> n >> q;
+	string s;
+	cin >> s;
+	seg tree(n);
+	rep(i, n) tree.update(i, (int)(s[i] - 'a') + 1);
+	rep(i, q){
+		int l, r;
+		cin >> l >> r;
+		cout << tree.query(l - 1, r - 1) << '\n';
+	}
 	return 0;
 }
 /*

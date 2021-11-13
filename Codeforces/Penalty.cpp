@@ -18,52 +18,44 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
 void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
+	int n = 10;
+	//england didn't deserve that penalty
+	string s;
+	cin >> s;
+	int nm = 0, ans = 10;
+	rep(i, n) if(s[i] == '?') nm++;
+	rep(i, (1 << nm)){
+		string s1 = s;
+		int cnt = 0;
+		rep(j, n) if(s1[j] == '?'){
+			if(i & (1 << (cnt++))) s1[j] = '1';
+			else s1[j] = '0';
+		}
+		int a = 0, b = 0;
+		int lft = 5, lft1 = 5;
+		rep(j, n){
+			if(j % 2 == 0){
+				if(s1[j] == '1') a++;
+				lft--;
+			}
+			else{
+				if(s1[j] == '1') b++;
+				lft1--;
+			}
+			int f = 0;
+			if(a - b > lft1) f = 1;
+			if(b - a > lft) f = 1;
+			if(f){
+				ans = min(ans, j + 1);
+				break;
+			}
+		}
 	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
+	cout << ans << '\n';
 }
 
 int main(){
@@ -71,9 +63,9 @@ int main(){
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int t;
+	cin >> t;
+	while(t--) solve();
 	return 0;
 }
 /*

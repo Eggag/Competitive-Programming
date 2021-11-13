@@ -18,62 +18,51 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+#define inf 0x3f3f3f3f
+const int mxN = 5005;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
-}
+int dp[mxN][mxN];
+vi g[mxN];
 
 int main(){
 	ios_base::sync_with_stdio(false);
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int n, m, k;
+	cin >> n >> m >> k;
+	rep(i, mxN) rep(j, mxN) dp[i][j] = -inf;
+	vector<array<int, 3>> p(n + 1);
+	repn(i, 1, n + 1) cin >> p[i][0] >> p[i][1] >> p[i][2];
+	vi ind(n + 1);
+	rep(i, n + 1) ind[i] = i;
+	rep(i, m){
+		int u, v;
+		cin >> u >> v;
+		ind[v] = max(ind[v], u);
+	}
+	repn(i, 1, n + 1) g[ind[i]].pb(p[i][2]);
+	repn(i, 1, n + 1){
+		sort(all(g[i]));
+		reverse(all(g[i]));
+		repn(j, 1, g[i].size()) g[i][j] += g[i][j - 1];
+	}
+	dp[0][k] = 0;
+	repn(i, 1, n + 1){
+		rep(j, mxN) if(dp[i - 1][j] >= 0 && j >= p[i][0]){
+			dp[i][j + p[i][1]] = max(dp[i][j + p[i][1]], dp[i - 1][j]);
+			rep(l, g[i].size()){
+				int nxt = j + p[i][1] - (l + 1);
+				if(nxt < 0) break;
+				dp[i][nxt] = max(dp[i][nxt], dp[i - 1][j] + g[i][l]);
+			}
+		}
+	}
+	int ans = -inf;
+	rep(j, mxN) ans = max(ans, dp[n][j]);
+	cout << (ans < 0 ? -1 : ans) << '\n';
 	return 0;
 }
 /*

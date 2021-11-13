@@ -18,62 +18,47 @@ typedef pair<int, int> pi;
 #define fi first
 #define se second
 #define sq(x) ((x) * (x))
-const int mxN = 5e5 + 5;
+const int mxN = 705;
 
 template<class T> T gcd(T a, T b){ return ((b == 0) ? a : gcd(b, a % b)); }
 
-int n, k;
-vector<pi> g[mxN];
-ll dp[mxN][2];
-
-bool cmp(pair<ll, ll> a, pair<ll, ll> b){
-	return a.fi - a.se > b.fi - b.se;
-}
-
-void dfs(int u, int prev){
-	vector<pair<ll, ll>> p;
-	for(pi v : g[u]) if(v.fi != prev){
-		dfs(v.fi, u);
-		p.pb(mp(dp[v.fi][1] + (ll)(v.se), dp[v.fi][0]));
-	}
-	sort(all(p), cmp);
-	rep(i, p.size()){
-		if(p[i].se >= p[i].fi){
-			dp[u][0] += p[i].se;
-			dp[u][1] += p[i].se;
-		}
-		else{
-			if(i < k) dp[u][0] += p[i].fi;
-			else dp[u][0] += p[i].se;
-			if(i < (k - 1)) dp[u][1] += p[i].fi;
-			else dp[u][1] += p[i].se;
-		}
-	}
-}
-
-void solve(){
-	cin >> n >> k;
-	rep(i, n) g[i].clear();
-	rep(i, n - 1){
-		int a, b, c;
-		cin >> a >> b >> c;
-		a--, b--;
-		g[a].pb({b, c});
-		g[b].pb({a, c});
-	}
-	rep(i, n) rep(j, 2) dp[i][j] = 0LL;
-	dfs(0, -1);
-	cout << dp[0][0] << '\n';
-}
+int dp[2][mxN][mxN];
+int g[mxN][mxN];
 
 int main(){
 	ios_base::sync_with_stdio(false);
 	cin.tie(0);
 	//freopen("input.in", "r", stdin);
 	//freopen("output.out", "w", stdout);
-	int q;
-	cin >> q;
-	while(q--) solve();
+	int n;
+	cin >> n;
+	vi a(n);
+	rep(i, n) cin >> a[i];
+	vi b = {a[0]};
+	repn(i, 1, n) if(a[i] != a[i - 1]) b.pb(a[i]);
+	n = (int)(b.size());
+	rep(i, n) rep(j, n) g[i][j] = gcd(b[i], b[j]);
+	rep(len, n){
+		rep(i, n - len){
+			repn(j, i, i + len + 1){
+				if(!dp[0][i][i + len] && i){
+					if((j <= i || dp[1][i][j - 1]) && ((j + 1) > (i + len) || dp[0][j + 1][i + len])){
+						if(g[j][i - 1] > 1) dp[0][i][i + len] = 1;
+					}
+				}
+				if(!dp[1][i][i + len] && (i + len + 1) < n){
+					if((j <= i || dp[1][i][j - 1]) && ((j + 1) > (i + len) || dp[0][j + 1][i + len])){
+						if(g[j][i + len + 1] > 1) dp[1][i][i + len] = 1;
+					}
+				}
+				if(dp[0][i][i + len] && dp[1][i][i + len]) break;
+			}
+		}
+	}
+	int f = 0;
+	repn(i, 1, n - 1) if(dp[1][0][i - 1] && dp[0][i + 1][n - 1]) f = 1;
+	if(dp[0][1][n - 1] || dp[0][0][n - 2]) f = 1;
+	cout << (f ? "Yes" : "No") << '\n';
 	return 0;
 }
 /*
